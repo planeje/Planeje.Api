@@ -5,12 +5,12 @@ exports.createTransaction = async (req, res) => {
     const { 
         description,
         recurrent,
-        transaction_value,
-        category_id,
-        bank_id,
-        transaction_date,
-        transaction_due_date,
-        transaction_type
+        transactionValue,
+        categoryId,
+        bankId,
+        transactionDate,
+        transactionDueDate,
+        transactionType
     } = req.body;
     const { rows } = await db.query(
         `INSERT INTO public.transactions(
@@ -19,12 +19,12 @@ exports.createTransaction = async (req, res) => {
         [
             description,
             recurrent,
-            transaction_value,
-            category_id,
-            bank_id,
-            transaction_date,
-            transaction_due_date,
-            transaction_type
+            transactionValue,
+            categoryId,
+            bankId,
+            transactionDate,
+            transactionDueDate,
+            transactionType
         ]
     );
 
@@ -34,12 +34,12 @@ exports.createTransaction = async (req, res) => {
             transaction: {
                 description,
                 recurrent,
-                transaction_value,
-                category_id,
-                bank_id,
-                transaction_date,
-                transaction_due_date,
-                transaction_type
+                transactionValue,
+                categoryId,
+                bankId,
+                transactionDate,
+                transactionDueDate,
+                transactionType
             }
         }
     });
