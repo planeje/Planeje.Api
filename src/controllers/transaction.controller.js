@@ -29,7 +29,7 @@ exports.createTransaction = async (req, res) => {
     );
 
     res.status(201).send({
-        message: "Product added successfully!",
+        message: "Transaction added successfully!",
         body: {
             transaction: {
                 description,
