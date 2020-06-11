@@ -61,10 +61,10 @@ exports.updateTransactionById = async (req, res) => {
     const { 
         description,
         recurrent,
-        transaction_value,
-        category_id,
-        bank_id,
-        transaction_due_date,
+        transactionValue,
+        categoryId,
+        bankId,
+        transactionDueDate,
     } = req.body;
 
     const response = await db.query(
@@ -80,10 +80,10 @@ exports.updateTransactionById = async (req, res) => {
             [
                 description,
                 recurrent,
-                transaction_value,
-                category_id,
-                bank_id,
-                transaction_due_date,
+                transactionValue,
+                categoryId,
+                bankId,
+                transactionDueDate,
                 transactionId
             ]
     );
