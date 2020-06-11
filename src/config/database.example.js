@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const pool = new Pool({
-    connectionString: 'postgresql://postgres:admin@localhost:5432/planeje_db'
+    //alterar senha
+    connectionString: 'postgresql://postgres:123@localhost:5432/planeje_db'
 });
 
 pool.on('connect', () => {
