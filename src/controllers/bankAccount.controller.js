@@ -29,7 +29,7 @@ exports.listAllBankAccounts = async (req, res) => {
 
 exports.findBankAccountById = async (req, res) => {
     const accountId = parseInt(req.params.id);
-    const response = await db.query('SELECT * FROM public.categories WHERE account_id = $1', [accountId]);
+    const response = await db.query('SELECT * FROM public.bank_account WHERE account_id = $1', [accountId]);
     res.status(200).send(response.rows);
 }
 
