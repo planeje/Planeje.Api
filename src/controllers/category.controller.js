@@ -40,7 +40,7 @@ exports.updateCategoryById = async (req, res) => {
     const response = await db.query(
         `UPDATE public.categories SET 
             category_name = $1
-            WHERE categoryId = $2
+            WHERE category_id = $2
             `,
             [
                 category_name,
@@ -52,7 +52,7 @@ exports.updateCategoryById = async (req, res) => {
 }
 
 exports.deleteCategoryById = async (req, res) => {
-    const transactionId = parseInt(req.params.id);
+    const categoryId = parseInt(req.params.id);
     await db.query('DELETE FROM public.categories WHERE category_id = $1', [
         categoryId
     ]);
