@@ -34,7 +34,7 @@ exports.findCategoryById = async (req, res) => {
 exports.updateCategoryById = async (req, res) => {
     const categoryId = parseInt(req.params.id);
     const { 
-        category_name,
+        categoryName,
     } = req.body;
 
     const response = await db.query(
@@ -43,7 +43,7 @@ exports.updateCategoryById = async (req, res) => {
             WHERE category_id = $2
             `,
             [
-                category_name,
+                categoryName,
                 categoryId
             ]
     );
