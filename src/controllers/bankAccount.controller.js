@@ -36,7 +36,7 @@ exports.findBankAccountById = async (req, res) => {
 exports.updateBankAccountById = async (req, res) => {
     const accountId = parseInt(req.params.id);
     const { 
-        account_name,
+        accountName,
         balance,
     } = req.body;
 
@@ -47,7 +47,7 @@ exports.updateBankAccountById = async (req, res) => {
             WHERE account_id = $3
             `,
             [
-                account_name,
+                accountName,
                 balance,
                 accountId
             ]
