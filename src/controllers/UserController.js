@@ -1,11 +1,15 @@
 const User = require("../models/User");
 
 module.exports = {
+    async index(req, res) {
+        const user = await User.findAll();
+        return res.json(user)
+    },
     async store(req, res) {
-        const { Name, Email, Password} = req.body;
+        const { name, email, password} = req.body;
 
-        const user = await User.create({ Name, Email, Password});
+        const user = await User.create({ name, email, password});
 
-        return req.json(users);
+        return res.json(user);
     }
 }
