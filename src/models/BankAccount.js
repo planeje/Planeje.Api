@@ -7,8 +7,11 @@ class BankAccount extends Model{
             balance: DataTypes.FLOAT,
         }, {
             sequelize
-        }
-        )
+        })
+    }
+
+    static associate(models) {
+        this.belongsTo(models.User, { foreignKey: 'userId', as: 'user'})
     }
 }
 

@@ -11,6 +11,10 @@ class User extends Model{
         }
         )
     }
+
+    static associate(models) {
+        this.hasMany(models.BankAccount, { foreignKey: 'userId', as: 'bankAccounts' })
+    }
 }
 
 module.exports = User;

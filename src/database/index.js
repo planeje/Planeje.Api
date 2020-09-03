@@ -17,4 +17,7 @@ Trasaction.init(connection);
 SpendingGoal.init(connection)
 Log.init(connection)
 
+User.associate(connection.models);
+BankAccount.associate(connection.models);
+
 module.exports = connection;
