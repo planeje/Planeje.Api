@@ -1,4 +1,4 @@
-const { destroy, update } = require("../models/User");
+//const { destroy, update } = require("../models/User");
 const User = require("../models/User");
 
 module.exports = {
