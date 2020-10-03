@@ -1,10 +1,23 @@
 //const { destroy, update } = require("../models/User");
 const User = require("../models/User");
+const jwt = require('jsonwebtoken');
+const authConfig = require('../config/auth.json');
 
-module.exports = {
+function generateToken(params = {}) {
+    return jwt.sign(params, authConfig.secret, {
+        expiresIn: 86400
+    });
+};
+
+module.exports = {    
     async index(req, res) {
         const user = await User.findAll();
         return res.json(user)
+    },
+    async one(req, res) {
+        const id = req.params.id;
+        const user = await User.findByPk(id);
+        return res.json(user);
     },
     async store(req, res) {
         const { name, email, password} = req.body;
@@ -47,5 +60,21 @@ module.exports = {
         else{
             return res.json('User Account not found')
         }
+    },
+    async authenticate(req, res) {
+        const id = req.params.id;
+        const { email, password } = req.body;
+        const user = await User.findByPk(id);
+
+        if (!user)
+            return res.status(400).send({ error: 'User not found!' });
+
+        if (password !== user.password)
+            return res.status(400).send({ error: 'Invalid password' }); 
+
+        return res.send({
+            user,
+            tokent: generateToken({ id: user.id })
+        });
     }
 }
