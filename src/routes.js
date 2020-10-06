@@ -8,8 +8,8 @@ const authMiddleware = require('./middlewares/auth');
 const routes = express.Router();
 
 routes.post('/users/:id/authenticate', UserController.authenticate);
+routes.post('/users', UserController.store);
 routes.use(authMiddleware).get('/users', UserController.index);
-routes.use(authMiddleware).post('/users', UserController.store);
 routes.use(authMiddleware).delete('/users/:id', UserController.destroy);
 routes.use(authMiddleware).put('/users/:id', UserController.update)
 
