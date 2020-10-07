@@ -79,7 +79,7 @@ module.exports = {
         user.password = null;
         return res.send({
             user,
-            tokent: generateToken({ id: user.id })
+            token: generateToken({ id: user.id })
         });
     }
 }
