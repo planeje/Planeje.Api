@@ -31,15 +31,13 @@ class User extends Model {
                 }
             },
             sequelize
-        },
-        // {
-        // }
+        }
         )
     }
     static associate(models) {
         this.hasMany(models.Category, { foreignKey: 'userId', as: 'categories' })
         this.hasMany(models.BankAccount, { foreignKey: 'userId', as: 'bankAccounts' })
-    }   
+    }
 }
 
 module.exports = User;

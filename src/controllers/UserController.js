@@ -9,7 +9,7 @@ function generateToken(params = {}) {
     });
 };
 
-module.exports = {    
+module.exports = {
     async index(req, res) {
         const user = await User.findAll({
             attributes: {
