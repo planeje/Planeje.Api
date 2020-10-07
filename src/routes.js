@@ -7,7 +7,7 @@ const authMiddleware = require('./middlewares/auth');
 
 const routes = express.Router();
 
-routes.post('/users/:id/authenticate', UserController.authenticate);
+routes.post('/users/authenticate', UserController.authenticate);
 routes.post('/users', UserController.store);
 routes.use(authMiddleware).get('/users', UserController.index);
 routes.use(authMiddleware).delete('/users/:id', UserController.destroy);

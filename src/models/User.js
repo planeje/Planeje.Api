@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const bcrypt = require ('bcryptjs')
 
 class User extends Model {
     static init(sequelize) {
@@ -14,6 +15,16 @@ class User extends Model {
             },
         },
         {
+            hooks:{
+                beforeCreate: (user, options) => {
+                    return bcrypt.hash(user.password, 10)
+                        .then(hash => {
+                            user.password = hash
+                        }).catch(err => {
+                            throw new Error()
+                        });
+                }
+            },
             scopes: {
                 noPassword:{
                     attributes: { exclude: ['password'] }

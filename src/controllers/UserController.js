@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
 const authConfig = require('../config/auth.json');
+const bcrypt = require('bcryptjs')
 
 function generateToken(params = {}) {
     return jwt.sign(params, authConfig.secret, {
@@ -20,12 +21,10 @@ module.exports = {
     async one(req, res) {
         const id = req.params.id;
         const user = await User.findByPk(id);
-        delete user.password;
         return res.json(user);
     },
     async store(req, res) {
         const { name, email, password} = req.body;
-
         const user = await User.create({ name, email, password});
 
         return res.json(user);
@@ -66,17 +65,16 @@ module.exports = {
         }
     },
     async authenticate(req, res) {
-        const id = req.params.id;
         const { email, password } = req.body;
-        const user = await User.findByPk(id);
+        const user = await User.findOne({ where: {email: email} });
 
         if (!user)
             return res.status(400).send({ error: 'User not found!' });
 
-        if (password !== user.password)
+        if (!await bcrypt.compare(password, user.password))
             return res.status(400).send({ error: 'Invalid password' });
 
-        user.password = null;
+        user.password = undefined;
         return res.send({
             user,
             token: generateToken({ id: user.id })
