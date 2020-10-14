@@ -30,7 +30,8 @@ class User extends Model {
                     attributes: { exclude: ['password'] }
                 }
             },
-            sequelize
+            sequelize,
+            paranoid: true
         }
         )
     }

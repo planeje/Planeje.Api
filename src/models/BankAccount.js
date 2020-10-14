@@ -6,7 +6,8 @@ class BankAccount extends Model{
             accountName: DataTypes.STRING,
             balance: DataTypes.FLOAT,
         }, {
-            sequelize
+            sequelize,
+            paranoid: true
         })
     }
 

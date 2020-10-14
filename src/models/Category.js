@@ -6,7 +6,8 @@ class Category extends Model{
             name: DataTypes.STRING,
             color: DataTypes.STRING
         }, {
-            sequelize
+            sequelize,
+            paranoid: true
         }
         )
     }

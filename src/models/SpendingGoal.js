@@ -9,7 +9,8 @@ class SpendingGoal extends Model{
             value: DataTypes.FLOAT,
             valueAvaible: DataTypes.FLOAT,
         }, {
-            sequelize
+            sequelize,
+            paranoid: true
         }
         )
     }

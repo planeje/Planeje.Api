@@ -6,7 +6,8 @@ class Log extends Model{
             table: DataTypes.STRING,
             action: DataTypes.STRING,
         }, {
-            sequelize
+            sequelize,
+            paranoid: true
         }
         )
     }
