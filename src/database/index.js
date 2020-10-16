@@ -6,7 +6,7 @@ const BankAccount = require('../models/BankAccount');
 const Category = require('../models/Category')
 const Trasaction = require('../models/Transaction')
 const SpendingGoal = require('../models/SpendingGoal')
-const Log = require('../models/log')
+const Log = require('../models/Log')
 
 const connection = new Sequelize(dbConfig);
 
