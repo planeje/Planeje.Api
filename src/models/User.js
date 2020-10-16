@@ -13,17 +13,25 @@ class User extends Model {
                 type: DataTypes.STRING,
                 allowNull: false
             },
+            passwordResetToken: {
+              type: DataTypes.STRING,
+              allowNull: true
+            },
+            passwordResetExpires: {
+              type: Date,
+              allowNull: true
+            }
         },
         {
             hooks:{
-                beforeCreate: (user, options) => {
-                    return bcrypt.hash(user.password, 10)
-                        .then(hash => {
-                            user.password = hash
-                        }).catch(err => {
-                            throw new Error()
-                        });
-                }
+              beforeCreate: (user, options) => {
+                return bcrypt.hash(user.password, 10)
+                  .then(hash => {
+                      user.password = hash;
+                  }).catch(err => {
+                      console.log('err', err);
+                  });
+              }
             },
             scopes: {
                 noPassword:{
@@ -32,7 +40,7 @@ class User extends Model {
             },
             sequelize
         }
-        )
+      )
     }
     static associate(models) {
         this.hasMany(models.Category, { foreignKey: 'userId', as: 'categories' })

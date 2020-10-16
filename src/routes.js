@@ -9,6 +9,8 @@ const routes = express.Router();
 // users
 routes.post('/users/authenticate', UserController.authenticate);
 routes.post('/users', UserController.store);
+routes.post('/users/forgotPassword', UserController.forgotPassword);
+routes.post('/users/resetPassword', UserController.resetPassword);
 routes.use(authMiddleware).get('/users', UserController.index);
 routes.use(authMiddleware).delete('/users/:id', UserController.destroy);
 routes.use(authMiddleware).put('/users/:id', UserController.update)
