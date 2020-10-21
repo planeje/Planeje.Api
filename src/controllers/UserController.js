@@ -103,7 +103,7 @@ module.exports = {
 
       mailer.messages().send({
         from: 'planejetcc@gmail.com',
-        to: 'tzampieri7@gmail.com',
+        to: user.email,
         subject: 'Equipe Plabeje | Recuperação de senha',
         text: `Utilize o seguinte token para recuperar sua senha: ${token}`
       }, (err, body) => {
