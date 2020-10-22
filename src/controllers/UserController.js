@@ -86,7 +86,7 @@ module.exports = {
           id: id
         }
       });
-      return req.status(201).send();
+      return res.status(201).send();
     },
     async authenticate(req, res) {
       const { email, password } = req.body;
