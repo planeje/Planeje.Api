@@ -22,7 +22,12 @@ module.exports = {
     },
     async one(req, res) {
         const id = req.params.id;
-        const user = await User.findByPk(id);
+        const user = await User.findByPk(id,
+          {
+            attributes: {
+              exclude: ['password']
+            }
+          });
         return res.json(user);
     },
     async store(req, res) {
