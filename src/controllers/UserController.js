@@ -52,39 +52,56 @@ module.exports = {
         }
     },
     async update(req, res) {
-        const { id } = req.params;
-        const { name, email, password } = req.body;
-        const user = await User.findByPk(id)
-        if(user){
-            User.update({
-                name: name,
-                email: email,
-                password: password
-            },{
-                where: {
-                    id: id
-                }
-            })
-            return res.json('User Account '+ id + ' updated')
+      const { id } = req.params;
+      const { name, email } = req.body;
+      const user = await User.findByPk(id);
+      if(user){
+        User.update({
+          name: name,
+          email: email
+        },{
+          where: {
+            id: id
+          }
+        });
+        const newUser = await User.findByPk(id);
+        return res.status(200).send(newUser);
+      }
+      else{
+        return res.status(400).send({ error: 'User not found!' })
+      }
+    },
+    async updatePassword(req, res) {
+      const { id } = req.params;
+      const { password } = req.body;
+      const user = await User.findByPk(id);
+
+      if (!user)
+        return res.status(400).send({ error: 'User not found!' });
+
+      User.update({
+        password: password,
+      },{
+        where: {
+          id: id
         }
-        else{
-            return res.json('User Account not found')
-        }
+      });
+      return req.status(201).send();
     },
     async authenticate(req, res) {
       const { email, password } = req.body;
       const user = await User.findOne({ where: {email: email} });
 
       if (!user)
-          return res.status(400).send({ error: 'User not found!' });
+        return res.status(400).send({ error: 'User not found!' });
 
       if (!await bcrypt.compare(password, user.password))
-          return res.status(400).send({ error: 'Invalid password' });
+        return res.status(400).send({ error: 'Invalid password' });
 
       user.password = undefined;
       return res.send({
-          user,
-          token: generateToken({ id: user.id })
+        user,
+        token: generateToken({ id: user.id })
       });
     },
     async forgotPassword(req, res) {

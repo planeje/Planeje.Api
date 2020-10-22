@@ -14,7 +14,8 @@ routes.post('/users/resetPassword', UserController.resetPassword);
 routes.use(authMiddleware).get('/users', UserController.index);
 routes.use(authMiddleware).get('/users/:id', UserController.one);
 routes.use(authMiddleware).delete('/users/:id', UserController.destroy);
-routes.use(authMiddleware).put('/users/:id', UserController.update)
+routes.use(authMiddleware).put('/users/:id', UserController.update);
+routes.use(authMiddleware).put('/users/:id/changePassword', UserController.updatePassword);
 // bank accounts
 routes.use(authMiddleware).get('/users/:userId/bankAccounts', BankAccountController.index)
 routes.use(authMiddleware).post('/users/:userId/bankAccounts', BankAccountController.store)
