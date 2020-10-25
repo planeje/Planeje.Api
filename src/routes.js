@@ -22,8 +22,8 @@ routes.use(authMiddleware).post('/user/:userId/bankAccounts', BankAccountControl
 routes.use(authMiddleware).delete('/bankAccounts/:id', BankAccountController.destroy);
 routes.use(authMiddleware).put('/bankAccounts/:id', BankAccountController.update);
 // categories
-routes.use(authMiddleware).get('/users/:userId/categories', CategoryController.index);
-routes.use(authMiddleware).post('/users/:userId/categories', CategoryController.store);
+routes.use(authMiddleware).get('/user/:userId/categories', CategoryController.index);
+routes.use(authMiddleware).post('/user/:userId/categories', CategoryController.store);
 routes.use(authMiddleware).delete('/categories/:id', CategoryController.destroy);
 routes.use(authMiddleware).put('/categories/:id', CategoryController.update);
 
