@@ -10,7 +10,8 @@ class Transaction extends Model{
             transactionDueDate: DataTypes.DATE,
             transactionType: DataTypes.INTEGER,
         }, {
-            sequelize
+            sequelize,
+            paranoid: true
         }
         )
     }
