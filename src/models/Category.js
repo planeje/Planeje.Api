@@ -1,7 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
 
 class Category extends Model{
-  static init(sequelize){
+  static init(sequelize) {
     super.init({
       name: DataTypes.STRING,
       color: DataTypes.STRING
@@ -12,6 +12,7 @@ class Category extends Model{
   }
   static associate(models) {
     this.belongsTo(models.User, { foreignKey: 'userId', as: 'user'});
+    this.hasMany(models.SpendingGoal, { foreignKey: 'categoryId', as: 'spendingGoals' });
   }
 }
 
