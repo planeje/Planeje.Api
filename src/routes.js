@@ -3,6 +3,7 @@ const BankAccountController = require('./controllers/BankAccountController');
 const CategoryController = require('./controllers/CategoryController');
 const UserController = require('./controllers/UserController');
 const authMiddleware = require('./middlewares/auth');
+const TransactionController = require('./controllers/TransactionController');
 
 
 const routes = express.Router();
@@ -26,5 +27,9 @@ routes.use(authMiddleware).get('/users/:userId/categories', CategoryController.i
 routes.use(authMiddleware).post('/users/:userId/categories', CategoryController.store);
 routes.use(authMiddleware).delete('/categories/:id', CategoryController.destroy);
 routes.use(authMiddleware).put('/categories/:id', CategoryController.update);
-
+// Transactions
+routes.use(authMiddleware).get('/user/:userId/transactions', TransactionController.index);
+routes.use(authMiddleware).post('/user/:userId/transactions', TransactionController.store);
+routes.use(authMiddleware).delete('/transactions/:id', TransactionController.destroy);
+routes.use(authMiddleware).put('/transactions/:id', TransactionController.update);
 module.exports = routes;
