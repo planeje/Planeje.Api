@@ -41,7 +41,7 @@ module.exports = {
         id: id
       }
     });
-    return res.status(201).send();
+    return res.status(200).send();
   },
 
   async update(req, res) {
