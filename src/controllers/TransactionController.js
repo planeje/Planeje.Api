@@ -1,19 +1,34 @@
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
+const { Op } = require('sequelize')
 
 module.exports = {
     async index( req, res){
         const { userId } = req.params;
-
-        const user = await User.findByPk(userId, {
+        let query = {
+            where:{},
             include: { 
                 association: 'transactions', 
                 include: [
                     { association: 'category'},
                     {association: 'bankAccount'}
                 ]  
-            } 
-        })
+            }
+        }
+        if(req.query.categoryId){
+            query.where.categoryId = req.query.categoryId 
+        }
+        if(req.query.dataInicial && req.query.dataFinal){
+            //console.log('a')
+            query.where.transactionDueDate = {[Op.between] :[req.query.dataInicial, req.query.dataFinal]} 
+        }
+        
+
+        //console.log('query', query)
+
+        const user = await User.findByPk(userId, query )
+
+        
 
         return res.json(user.transactions)
     },
