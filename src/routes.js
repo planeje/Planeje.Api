@@ -28,7 +28,7 @@ routes.use(authMiddleware).post('/user/:userId/categories', CategoryController.s
 routes.use(authMiddleware).delete('/categories/:id', CategoryController.destroy);
 routes.use(authMiddleware).put('/categories/:id', CategoryController.update);
 // spending goals
-routes.use(authMiddleware).get('/category/:categoryId/goals', SpendingGoalController.index);
+routes.use(authMiddleware).get('/user/:userId/category/:categoryId/goals', SpendingGoalController.index);
 routes.use(authMiddleware).post('/user/:userId/category/:categoryId/goals', SpendingGoalController.store);
 routes.use(authMiddleware).put('/category/:categoryId/goals/:id', SpendingGoalController.update);
 routes.use(authMiddleware).delete('/category/:categoryId/goals/:id', SpendingGoalController.destroy);
