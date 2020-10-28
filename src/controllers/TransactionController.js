@@ -1,5 +1,6 @@
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
+const BankAccount = require("../models/BankAccount");
 const { Op } = require('sequelize')
 
 module.exports = {
@@ -46,10 +47,24 @@ module.exports = {
             accountId,
         } = req.body;
 
-        
-        
         const user = await User.findByPk(userId);
         
+        //Movimenta valor na transação
+        const bankAccount = await BankAccount.findByPk(accountId);
+        //console.log(bankAccount)
+        if(transactionType == 0){
+            await BankAccount.update(
+                {balance: bankAccount.balance - transactionValue}, 
+                {where: { id: accountId }}
+            ) 
+        }
+        else{
+            await BankAccount.update(
+                {balance: bankAccount.balance + transactionValue}, 
+                {where: { id: accountId }}
+            ) 
+        }
+
         if(!user) {
             return res.status(400).json({ error: 'User not found' });
         }
