@@ -1,6 +1,7 @@
 const express = require('express');
 const BankAccountController = require('./controllers/BankAccountController');
 const CategoryController = require('./controllers/CategoryController');
+const SpendingGoalController = require('./controllers/SpendingGoalController');
 const UserController = require('./controllers/UserController');
 const authMiddleware = require('./middlewares/auth');
 const TransactionController = require('./controllers/TransactionController');
@@ -23,10 +24,15 @@ routes.use(authMiddleware).post('/user/:userId/bankAccounts', BankAccountControl
 routes.use(authMiddleware).delete('/bankAccounts/:id', BankAccountController.destroy);
 routes.use(authMiddleware).put('/bankAccounts/:id', BankAccountController.update);
 // categories
-routes.use(authMiddleware).get('/users/:userId/categories', CategoryController.index);
-routes.use(authMiddleware).post('/users/:userId/categories', CategoryController.store);
+routes.use(authMiddleware).get('/user/:userId/categories', CategoryController.index);
+routes.use(authMiddleware).post('/user/:userId/categories', CategoryController.store);
 routes.use(authMiddleware).delete('/categories/:id', CategoryController.destroy);
 routes.use(authMiddleware).put('/categories/:id', CategoryController.update);
+// spending goals
+routes.use(authMiddleware).get('/user/:userId/category/:categoryId/goals', SpendingGoalController.index);
+routes.use(authMiddleware).post('/user/:userId/category/:categoryId/goals', SpendingGoalController.store);
+routes.use(authMiddleware).put('/category/:categoryId/goals/:id', SpendingGoalController.update);
+routes.use(authMiddleware).delete('/category/:categoryId/goals/:id', SpendingGoalController.destroy);
 // Transactions
 routes.use(authMiddleware).get('/user/:userId/transactions', TransactionController.index);
 routes.use(authMiddleware).post('/user/:userId/transactions', TransactionController.store);
