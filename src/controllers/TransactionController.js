@@ -1,6 +1,7 @@
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
-const { Op } = require('sequelize')
+const BankAccount = require("../models/BankAccount");
+const { Op } = require('sequelize');
 
 module.exports = {
   async index(req, res) {
@@ -93,6 +94,21 @@ module.exports = {
                     id: id
                 }
             })
+            //console.log(transaction)
+            //Tira ou coloca saldo da conta
+            const bankAccount = await BankAccount.findByPk(transaction.accountId);
+            if(transaction.transactionType == 0){
+                await BankAccount.update(
+                    {balance: bankAccount.balance + transaction.transactionValue},
+                    {where: { id: transaction.accountId }}
+                )
+            }
+            else{
+                await BankAccount.update(
+                    {balance: bankAccount.balance - transaction.transactionValue},
+                    {where: { id: transaction.accountId }}
+                )
+            }
             return res.json('Transaction '+ id + ' deleted');
         }
         else{
