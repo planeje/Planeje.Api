@@ -4,6 +4,7 @@ const CategoryController = require('./controllers/CategoryController');
 const SpendingGoalController = require('./controllers/SpendingGoalController');
 const UserController = require('./controllers/UserController');
 const authMiddleware = require('./middlewares/auth');
+const TransactionController = require('./controllers/TransactionController');
 
 
 const routes = express.Router();
@@ -32,5 +33,9 @@ routes.use(authMiddleware).get('/user/:userId/category/:categoryId/goals', Spend
 routes.use(authMiddleware).post('/user/:userId/category/:categoryId/goals', SpendingGoalController.store);
 routes.use(authMiddleware).put('/category/:categoryId/goals/:id', SpendingGoalController.update);
 routes.use(authMiddleware).delete('/category/:categoryId/goals/:id', SpendingGoalController.destroy);
-
+// Transactions
+routes.use(authMiddleware).get('/user/:userId/transactions', TransactionController.index);
+routes.use(authMiddleware).post('/user/:userId/transactions', TransactionController.store);
+routes.use(authMiddleware).delete('/transactions/:id', TransactionController.destroy);
+routes.use(authMiddleware).put('/transactions/:id', TransactionController.update);
 module.exports = routes;
