@@ -3,39 +3,39 @@ const User = require("../models/User");
 const { Op } = require('sequelize')
 
 module.exports = {
-    async index( req, res){
-        const { userId } = req.params;
-        let query = {
-            where:{},
-            include: { 
-                association: 'transactions', 
-                include: [
-                    { association: 'category'},
-                    {association: 'bankAccount'}
-                ]  
-            }
+  async index(req, res) {
+    const { userId } = req.params;
+    let query = {
+      include: {
+        association: 'transactions',
+        include: [
+          { association: 'category' },
+          { association: 'bankAccount'}
+        ]
+      }
+    }
+    if (req.query.categoryId > 0) {
+      query.include.include[0].where = {
+        id: req.query.categoryId
+      }
+    }
+    if (req.query.dataInicial && req.query.dataFinal) {
+      query.include.where = {
+        transactionDueDate: {
+          [Op.between]: [req.query.dataInicial, req.query.dataFinal]
         }
-        if(req.query.categoryId){
-            query.where.categoryId = req.query.categoryId 
-        }
-        if(req.query.dataInicial && req.query.dataFinal){
-            //console.log('a')
-            query.where.transactionDueDate = {[Op.between] :[req.query.dataInicial, req.query.dataFinal]} 
-        }
-        
+      }
+    }
+    const user = await User.findByPk(userId, query);
+    if(!user)
+      return res.status(200).send([]);
 
-        //console.log('query', query)
-
-        const user = await User.findByPk(userId, query )
-
-        
-
-        return res.json(user.transactions)
-    },
+    return res.status(200).send(user.transactions);
+  },
 
     async store(req, res) {
         const { userId } = req.params;
-        const { 
+        const {
             description,
             recurrent,
             transactionValue,
@@ -49,7 +49,23 @@ module.exports = {
         
         
         const user = await User.findByPk(userId);
-        
+
+        //Movimenta valor na transação
+        const bankAccount = await BankAccount.findByPk(accountId);
+        //console.log(bankAccount)
+        if(transactionType == 0){
+            await BankAccount.update(
+                {balance: bankAccount.balance - transactionValue},
+                {where: { id: accountId }}
+            )
+        }
+        else{
+            await BankAccount.update(
+                {balance: bankAccount.balance + transactionValue},
+                {where: { id: accountId }}
+            )
+        }
+
         if(!user) {
             return res.status(400).json({ error: 'User not found' });
         }
@@ -86,7 +102,7 @@ module.exports = {
 
     async update(req, res){
         const {id} = req.params;
-        const { 
+        const {
             description,
             recurrent,
             transactionValue,
@@ -117,7 +133,7 @@ module.exports = {
             return res.json('Transaction not found')
         }
     }
-    
+
 
 
 }
