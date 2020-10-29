@@ -22,17 +22,12 @@ module.exports = {
         if(!user) {
             return res.status(400).json({ error: 'User not found' });
         }
-        console.log("chegou aqui 1 ");
-        console.log(name)
-        console.log(color);
         const category = await Category.create({
             name,
             color,
             userId,
         });
 
-        console.log("chegou aqui 2 ");
-        console.log(category);
         return res.json(category);
     },
 

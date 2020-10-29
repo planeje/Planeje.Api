@@ -15,6 +15,11 @@ class Transaction extends Model{
         }
         )
     }
+    static associate(models) {
+        this.belongsTo(models.User, { foreignKey: 'userId', as: 'user'})
+        this.belongsTo(models.Category, { foreignKey: 'categoryId', as: 'category'})
+        this.belongsTo(models.BankAccount, { foreignKey: 'accountId', as: 'bankAccount'})
+    }
 }
 
 module.exports = Transaction;
