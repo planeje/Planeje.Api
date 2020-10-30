@@ -129,7 +129,7 @@ module.exports = {
             accountId, } = req.body;
         const transaction = await Transaction.findByPk(id)
         if(transaction){
-            Transaction.update({
+            const transactionEdited = Transaction.update({
                 description,
                 recurrent,
                 transactionValue,
@@ -143,6 +143,17 @@ module.exports = {
                     id: id
                 }
             })
+
+            if(transaction.transactionValue != transactionEdited.transactionValue){
+                console.log('original',transaction.transactionValue )
+                console.log('editado', transactionEdited.transactionValue)
+                await BankAccount.update({
+                    balance: transaction.transactionValue - transactionEdited.transactionValue
+                },{
+                    where: {id: transaction.accountId}
+                })
+            }
+
             return res.json('Transaction '+ id + ' updated')
         }
         else{
