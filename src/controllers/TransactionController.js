@@ -1,6 +1,7 @@
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 const BankAccount = require("../models/BankAccount");
+const SpendingGoal = require("../models/SpendingGoal");
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -47,23 +48,39 @@ module.exports = {
             accountId,
         } = req.body;
 
-        
-        
         const user = await User.findByPk(userId);
 
         //Movimenta valor na transação
         const bankAccount = await BankAccount.findByPk(accountId);
-        //console.log(bankAccount)
+        const spendingGoal = await SpendingGoal.findOne({ 
+            where: {categoryId: categoryId},
+        });
         if(transactionType == 0){
             await BankAccount.update(
                 {balance: bankAccount.balance - transactionValue},
                 {where: { id: accountId }}
+            )
+            await SpendingGoal.update(
+                {valueAvaible: spendingGoal.valueAvaible + transactionValue},
+                {where: { 
+                    categoryId: categoryId,
+                    goalDueDate: {[Op.gte] : new Date()}
+                    }
+                }
             )
         }
         else{
             await BankAccount.update(
                 {balance: bankAccount.balance + transactionValue},
                 {where: { id: accountId }}
+            )
+            await SpendingGoal.update(
+                {valueAvaible: spendingGoal.valueAvaible - transactionValue},
+                {where: { 
+                    categoryId: categoryId,
+                    goalDueDate: {[Op.gte] : new Date()}
+                    }
+                }
             )
         }
 
@@ -94,19 +111,40 @@ module.exports = {
                     id: id
                 }
             })
-            //console.log(transaction)
             //Tira ou coloca saldo da conta
             const bankAccount = await BankAccount.findByPk(transaction.accountId);
+            const spendingGoal = await SpendingGoal.findOne({ 
+                where: {categoryId: transaction.categoryId},
+                goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+            });
             if(transaction.transactionType == 0){
                 await BankAccount.update(
-                    {balance: bankAccount.balance + transaction.transactionValue},
-                    {where: { id: transaction.accountId }}
-                )
+                        {balance: bankAccount.balance + transaction.transactionValue},
+                        {where: { id: transaction.accountId }},
+                    )
+                    await SpendingGoal.update(
+                        {valueAvaible: spendingGoal.valueAvaible - transaction.transactionValue},
+                        {where: {
+                            categoryId: transaction.categoryId,
+                            goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+                        }
+                        },
+                        {limit: 1 }
+                    )
             }
             else{
                 await BankAccount.update(
                     {balance: bankAccount.balance - transaction.transactionValue},
-                    {where: { id: transaction.accountId }}
+                    {where: { id: transaction.accountId }},
+                )
+                await SpendingGoal.update(
+                    {valueAvaible: spendingGoal.valueAvaible + transaction.transactionValue},
+                    {where: { 
+                        categoryId: transaction.categoryId,
+                        goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+                        }
+                    },
+                    {limit: 1 } 
                 )
             }
             return res.json('Transaction '+ id + ' deleted');
@@ -143,15 +181,23 @@ module.exports = {
                     id: id
                 }
             })
-
-            if(transaction.transactionValue != transactionEdited.transactionValue){
-                console.log('original',transaction.transactionValue )
-                console.log('editado', transactionEdited.transactionValue)
+            
+            if(transaction.transactionValue != transactionValue){
+                const bankAccount = await BankAccount.findByPk(transaction.accountId)
                 await BankAccount.update({
-                    balance: transaction.transactionValue - transactionEdited.transactionValue
-                },{
-                    where: {id: transaction.accountId}
-                })
+                        balance: bankAccount.balance + (transaction.transactionValue - transactionValue)
+                    },{
+                        where: {id: transaction.accountId}
+                    }
+                );
+                const spendingGoal = await SpendingGoal.findOne({ 
+                    where: {categoryId: transaction.categoryId},
+                    goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+                });
+                await SpendingGoal.update({
+                    valueAvaible: spendingGoal.valueAvaible + (transaction.transactionValue - transactionValue)
+                    }, {where: {id: spendingGoal.id}}
+                )
             }
 
             return res.json('Transaction '+ id + ' updated')
@@ -160,7 +206,4 @@ module.exports = {
             return res.json('Transaction not found')
         }
     }
-
-
-
 }
