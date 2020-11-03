@@ -1,14 +1,23 @@
+const dayjs = require("dayjs");
 const Category = require("../models/Category");
 const User = require("../models/User");
+const SpendingGoalController = require("./SpendingGoalController");
 
 
 module.exports = {
   async index(req, res) {
     const { userId } = req.params;
+    const currentDate = dayjs().toISOString();
     const user = await User.findByPk(userId, {
-      include: { association: 'categories' }
+      include: {
+        association: 'categories',
+        include: {
+          association: 'spendingGoals',
+          attributes: ['valueAvaible', 'value'],
+          where: this.goalDueDate > currentDate
+        }
+      }
     });
-
     return res.status(200).send(user.categories);
   },
 
