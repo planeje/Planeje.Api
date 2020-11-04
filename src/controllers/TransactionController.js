@@ -57,14 +57,17 @@ module.exports = {
     });
     if(transactionType == 0) {
       await BankAccount.update(
-          {balance: bankAccount.balance - transactionValue},
-          {where: { id: accountId }}
+        { balance: bankAccount.balance - transactionValue },
+        { where: { id: accountId }}
       );
       await SpendingGoal.update(
-        { valueAvaible: spendingGoal.valueAvaible + transactionValue },
-        { where: {
-            categoryId: categoryId,
-            goalDueDate: {[Op.gte] : new Date()}
+        { valueAvaible: spendingGoal.valueAvaible - transactionValue },
+        {
+          where: {
+            [Op.and]: {
+              categoryId: categoryId,
+              goalDueDate: { [Op.gte]: transactionDueDate }
+            }
           }
         }
       );
@@ -98,7 +101,7 @@ module.exports = {
         accountId
       });
 
-      return res.json(transaction);
+      return res.status(200).send(transaction);
   },
 
   async destroy(req, res) {
