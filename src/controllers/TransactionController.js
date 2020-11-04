@@ -146,10 +146,10 @@ module.exports = {
           {limit: 1 }
         );
       }
-      return res.json('Transaction '+ id + ' deleted');
+      return res.status(200).send();
 
     } else {
-      return res.json('Transaction not found')
+      return res.status(401).send({ error: 'Transaction not found'});
     }
   },
 
@@ -201,9 +201,9 @@ module.exports = {
         );
       }
 
-      return res.json('Transaction '+ id + ' updated')
+      return res.status(200).send(transactionEdited);
     } else{
-      return res.json('Transaction not found')
+      return res.status(401).send({ error: 'Transaction not found' });
     }
   }
 }
