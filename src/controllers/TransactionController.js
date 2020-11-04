@@ -11,8 +11,14 @@ module.exports = {
       include: {
         association: 'transactions',
         include: [
-          { association: 'category' },
-          { association: 'bankAccount'}
+          {
+            association: 'category',
+            paranoid: false
+          },
+          {
+            association: 'bankAccount',
+            paranoid: false
+          }
         ]
       }
     }
@@ -53,24 +59,30 @@ module.exports = {
     //Movimenta valor na transação
     const bankAccount = await BankAccount.findByPk(accountId);
     const spendingGoal = await SpendingGoal.findOne({
-      where: {categoryId: categoryId},
+      where: {
+        categoryId: categoryId,
+        [Op.and]: {
+          categoryId: categoryId,
+          goalDueDate: { [Op.gte]: transactionDueDate }
+        }
+      },
     });
-    if(transactionType == 0) {
+    if(transactionType === 0) {
       await BankAccount.update(
         { balance: bankAccount.balance - transactionValue },
         { where: { id: accountId }}
       );
-      await SpendingGoal.update(
-        { valueAvaible: spendingGoal.valueAvaible - transactionValue },
-        {
-          where: {
-            [Op.and]: {
-              categoryId: categoryId,
-              goalDueDate: { [Op.gte]: transactionDueDate }
+
+      if(!!spendingGoal) {
+        await SpendingGoal.update(
+          { valueAvaible: spendingGoal.valueAvaible - transactionValue },
+          {
+            where: {
+              id: spendingGoal.id
             }
           }
-        }
-      );
+        );
+      }
     } else {
         await BankAccount.update(
           { balance: bankAccount.balance + transactionValue },
