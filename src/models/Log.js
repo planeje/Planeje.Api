@@ -5,11 +5,15 @@ class Log extends Model{
         super.init({
             table: DataTypes.STRING,
             action: DataTypes.STRING,
+            registerId: DataTypes.INTEGER,
         }, {
             sequelize,
             paranoid: true
         }
         )
+    }
+    static associate(models) {
+        this.belongsTo(models.User, { foreignKey: 'userId', as: 'user'});
     }
 }
 
