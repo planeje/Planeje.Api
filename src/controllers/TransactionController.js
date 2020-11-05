@@ -3,20 +3,26 @@ const User = require("../models/User");
 const BankAccount = require("../models/BankAccount");
 const SpendingGoal = require("../models/SpendingGoal");
 const { Op } = require('sequelize');
+const Logger = require("./LogController")
 
 module.exports = {
-  async index(req, res) {
+    async index(req, res) {
     const { userId } = req.params;
+    const user = await User.findByPk(userId, query);
+
+    if(!user)
+      return res.status(400).json({ error: 'User not found' });
+
     let query = {
       include: {
-        association: 'transactions',
+          association: 'transactions',
         include: [
-          { association: 'category' },
-          { association: 'bankAccount'}
+            { association: 'category' },
+            { association: 'bankAccount'}
         ]
-      }
     }
-    if (req.query.categoryId > 0) {
+}
+if (req.query.categoryId > 0) {
       query.include.include[0].where = {
         id: req.query.categoryId
       }
@@ -28,9 +34,6 @@ module.exports = {
         }
       }
     }
-    const user = await User.findByPk(userId, query);
-    if(!user)
-      return res.status(200).send([]);
 
     return res.status(200).send(user.transactions);
   },
@@ -99,6 +102,12 @@ module.exports = {
             accountId
         });
 
+        Logger.store({
+            userId: transaction.userId,
+            table: 'Transactions',
+            action: 'I',
+            registerId: transaction.id
+          });
         return res.json(transaction);
     },
 
@@ -147,6 +156,14 @@ module.exports = {
                     {limit: 1 } 
                 )
             }
+
+            Logger.store({
+                userId: transaction.userId,
+                table: 'Transactions',
+                action: 'D',
+                registerId: transaction.id
+              });
+
             return res.json('Transaction '+ id + ' deleted');
         }
         else{
@@ -199,6 +216,13 @@ module.exports = {
                     }, {where: {id: spendingGoal.id}}
                 )
             }
+
+            Logger.store({
+                userId: transaction.userId,
+                table: 'Transactions',
+                action: 'U',
+                registerId: transaction.id
+              });
 
             return res.json('Transaction '+ id + ' updated')
         }

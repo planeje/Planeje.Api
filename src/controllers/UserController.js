@@ -4,6 +4,7 @@ const authConfig = require('../config/auth.json');
 const bcrypt = require('bcryptjs')
 const crypto = require('crypto');
 const mailer = require('../modules/mailer')
+const Logger = require("./LogController")
 
 function generateToken(params = {}) {
     return jwt.sign(params, authConfig.secret, {
@@ -34,6 +35,12 @@ module.exports = {
         const { name, email, password} = req.body;
         const user = await User.create({ name, email, password});
 
+        Logger.store({
+          userId: user.userId,
+          table: 'Users',
+          action: 'I',
+          registerId: user.id
+        });
         return res.json(user);
     },
     async destroy(req, res) {
@@ -65,6 +72,14 @@ module.exports = {
           }
         });
         const newUser = await User.findByPk(id);
+        
+        Logger.store({
+          userId: user.userId,
+          table: 'Users',
+          action: 'U',
+          registerId: user.id
+        });
+
         return res.status(200).send(newUser);
       }
       else{
