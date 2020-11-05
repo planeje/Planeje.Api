@@ -47,6 +47,7 @@ class User extends Model {
     this.hasMany(models.Category, { foreignKey: 'userId', as: 'categories' });
     this.hasMany(models.BankAccount, { foreignKey: 'userId', as: 'bankAccounts' });
     this.hasMany(models.SpendingGoal, { foreignKey: 'userId', as: 'spendingGoals' });
+    this.hasMany(models.Log, { foreignKey: 'userId', as: 'logs' });
   }
 }
 

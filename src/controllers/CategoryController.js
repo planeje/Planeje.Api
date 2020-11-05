@@ -1,8 +1,8 @@
 const Category = require("../models/Category");
 const User = require("../models/User");
-const SpendingGoalController = require("./SpendingGoalController");
 const dayjs = require("dayjs");
 
+const Logger = require("./LogController")
 
 module.exports = {
   async index(req, res) {
@@ -35,6 +35,12 @@ module.exports = {
       color,
       userId,
     });
+    Logger.store({
+      userId: userId,
+      table: 'Category',
+      action: 'I',
+      registerId: category.id
+    });
     return res.status(200).send(category);
   },
 
@@ -51,6 +57,12 @@ module.exports = {
       }
     });
 
+    Logger.store({
+      userId: category.userId,
+      table: 'Categories',
+      action: 'D',
+      registerId: category.id
+    });
     return res.status(200).send();
   },
 
@@ -71,6 +83,12 @@ module.exports = {
       }
     });
 
+    Logger.store({
+      userId: category.userId,
+      table: 'Categories',
+      action: 'U',
+      registerId: category.id
+    });
     return res.status(200).send(categoryEdited);
   }
 }

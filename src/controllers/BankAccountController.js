@@ -1,6 +1,6 @@
 const BankAccount = require("../models/BankAccount");
 const User = require("../models/User");
-
+const Logger = require("./LogController")
 
 module.exports = {
   async index(req, res) {
@@ -25,7 +25,12 @@ module.exports = {
       balance,
       userId
     });
-
+    Logger.store({
+      userId: userId,
+      table: 'BankAccounts',
+      action: 'I',
+      registerId: bankAccount.id
+    });
     return res.status(200).send(bankAccount);
   },
 
@@ -40,6 +45,12 @@ module.exports = {
       where: {
         id: id
       }
+    });
+    Logger.store({
+      userId: bankAccount.userId,
+      table: 'BankAccounts',
+      action: 'D',
+      registerId: bankAccount.id
     });
     return res.status(200).send();
   },
@@ -60,6 +71,14 @@ module.exports = {
         id: id
       }
     });
+
+    Logger.store({
+      userId: bankAccount.userId,
+      table: 'BankAccounts',
+      action: 'U',
+      registerId: bankAccount.id
+    });
+
     return res.status(200).send(bankAccountEdited);
   }
 }

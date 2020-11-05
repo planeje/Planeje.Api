@@ -5,6 +5,7 @@ const SpendingGoalController = require('./controllers/SpendingGoalController');
 const UserController = require('./controllers/UserController');
 const authMiddleware = require('./middlewares/auth');
 const TransactionController = require('./controllers/TransactionController');
+const LogController = require('./controllers/LogController');
 
 
 const routes = express.Router();
@@ -38,4 +39,6 @@ routes.use(authMiddleware).get('/user/:userId/transactions', TransactionControll
 routes.use(authMiddleware).post('/user/:userId/transactions', TransactionController.store);
 routes.use(authMiddleware).delete('/transactions/:id', TransactionController.destroy);
 routes.use(authMiddleware).put('/transactions/:id', TransactionController.update);
+//Logs
+routes.use(authMiddleware).get('/user/:userId/logs', LogController.index)
 module.exports = routes;

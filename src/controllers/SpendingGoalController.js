@@ -1,6 +1,6 @@
 const SpendingGoal = require("../models/SpendingGoal");
 const Category = require("../models/Category");
-const dayjs = require("dayjs");
+const Logger = require("./LogController")
 
 module.exports = {
   async index(req, res) {
@@ -34,6 +34,14 @@ module.exports = {
       userId,
       categoryId
     });
+
+    Logger.store({
+      userId: userId,
+      table: 'SpendingGoals',
+      action: 'I',
+      registerId: goal.id
+    });
+
     return res.status(200).send(goal);
   },
 
@@ -49,6 +57,13 @@ module.exports = {
         id,
         categoryId
       }
+    });
+
+    Logger.store({
+      userId: goal.userId,
+      table: 'SpendingGoals',
+      action: 'D',
+      registerId: goal.id
     });
 
     return res.status(200).send();
@@ -80,6 +95,12 @@ module.exports = {
 
     const goalEdited = await SpendingGoal.findByPk(id);
 
+    Logger.store({
+      userId: goal.userId,
+      table: 'SpendingGoals',
+      action: 'U',
+      registerId: goal.id
+    });
     return res.status(200).send(goalEdited);
   }
 }

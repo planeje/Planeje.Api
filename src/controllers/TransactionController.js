@@ -3,13 +3,19 @@ const User = require("../models/User");
 const BankAccount = require("../models/BankAccount");
 const SpendingGoal = require("../models/SpendingGoal");
 const { Op } = require('sequelize');
+const Logger = require("./LogController")
 
 module.exports = {
-  async index(req, res) {
+    async index(req, res) {
     const { userId } = req.params;
+    const user = await User.findByPk(userId, query);
+
+    if(!user)
+      return res.status(400).json({ error: 'User not found' });
+
     let query = {
       include: {
-        association: 'transactions',
+          association: 'transactions',
         include: [
           {
             association: 'category',
@@ -20,9 +26,9 @@ module.exports = {
             paranoid: false
           }
         ]
-      }
     }
-    if (req.query.categoryId > 0) {
+}
+if (req.query.categoryId > 0) {
       query.include.include[0].where = {
         id: req.query.categoryId
       }
@@ -34,9 +40,6 @@ module.exports = {
         }
       }
     }
-    const user = await User.findByPk(userId, query);
-    if(!user)
-      return res.status(200).send([]);
 
     return res.status(200).send(user.transactions);
   },
@@ -72,7 +75,6 @@ module.exports = {
         { balance: bankAccount.balance - transactionValue },
         { where: { id: accountId }}
       );
-
       if(!!spendingGoal) {
         await SpendingGoal.update(
           { valueAvaible: spendingGoal.valueAvaible - transactionValue },
@@ -84,36 +86,43 @@ module.exports = {
         );
       }
     } else {
-        await BankAccount.update(
-          { balance: bankAccount.balance + transactionValue },
-          { where: { id: accountId } }
-        );
-        await SpendingGoal.update(
-          { valueAvaible: spendingGoal.valueAvaible - transactionValue },
-          {where: {
-              categoryId: categoryId,
-              goalDueDate: {[Op.gte] : new Date()}
-            }
+      await BankAccount.update(
+        { balance: bankAccount.balance + transactionValue },
+        { where: { id: accountId } }
+      );
+      await SpendingGoal.update(
+        { valueAvaible: spendingGoal.valueAvaible - transactionValue },
+        {where: {
+            categoryId: categoryId,
+            goalDueDate: {[Op.gte] : new Date()}
           }
-        );
-      }
+        }
+      );
+    }
 
-      if(!user) {
-        return res.status(400).json({ error: 'User not found' });
-      }
-      const transaction  = await Transaction.create({
-        description,
-        recurrent,
-        transactionValue,
-        transactionDate,
-        transactionDueDate,
-        transactionType,
-        userId,
-        categoryId,
-        accountId
-      });
+    if(!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+    const transaction  = await Transaction.create({
+      description,
+      recurrent,
+      transactionValue,
+      transactionDate,
+      transactionDueDate,
+      transactionType,
+      userId,
+      categoryId,
+      accountId
+    });
 
-      return res.status(200).send(transaction);
+    Logger.store({
+      userId: transaction.userId,
+      table: 'Transactions',
+      action: 'I',
+      registerId: transaction.id
+    });
+
+    return res.status(200).send(transaction);
   },
 
   async destroy(req, res) {
@@ -124,7 +133,13 @@ module.exports = {
         where: {
           id: id
         }
-      })
+      });
+      Logger.store({
+        userId: transaction.userId,
+        table: 'Transactions',
+        action: 'U',
+        registerId: transaction.id
+      });
       //Tira ou coloca saldo da conta
       const bankAccount = await BankAccount.findByPk(transaction.accountId);
       const spendingGoal = await SpendingGoal.findOne({
