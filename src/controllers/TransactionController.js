@@ -147,8 +147,8 @@ module.exports = {
         await SpendingGoal.update(
           { valueAvaible: spendingGoal.valueAvaible - transaction.transactionValue },
           { where: {
-              categoryId: transaction.categoryId,
-              goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+            categoryId: transaction.categoryId,
+            goalDueDate: {[Op.lte] : transaction.transactionDueDate}
           } },
           { limit: 1 }
         );
