@@ -90,14 +90,6 @@ module.exports = {
         { balance: bankAccount.balance + transactionValue },
         { where: { id: accountId } }
       );
-      await SpendingGoal.update(
-        { valueAvaible: spendingGoal.valueAvaible - transactionValue },
-        {where: {
-            categoryId: categoryId,
-            goalDueDate: {[Op.gte] : new Date()}
-          }
-        }
-      );
     }
 
     if(!user) {
@@ -146,6 +138,7 @@ module.exports = {
         where: {categoryId: transaction.categoryId},
         goalDueDate: {[Op.lte] : transaction.transactionDueDate}
       });
+
       if(transaction.transactionType == 0) {
         await BankAccount.update(
           { balance: bankAccount.balance + transaction.transactionValue },
@@ -163,14 +156,6 @@ module.exports = {
         await BankAccount.update(
           { balance: bankAccount.balance - transaction.transactionValue },
           { where: { id: transaction.accountId } },
-        );
-        await SpendingGoal.update(
-          { valueAvaible: spendingGoal.valueAvaible + transaction.transactionValue },
-          { where: {
-            categoryId: transaction.categoryId,
-            goalDueDate: { [Op.lte] : transaction.transactionDueDate }
-          }},
-          {limit: 1 }
         );
       }
       return res.status(200).send();
