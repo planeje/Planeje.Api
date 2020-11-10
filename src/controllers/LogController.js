@@ -9,8 +9,9 @@ module.exports = {
       });
       return res.status(200).send(user.logs);
     },
-  
+
     async store(data) {
+      console.log('criar log', data);
         Log.create({
             userId:data.userId,
             table: data.table,
