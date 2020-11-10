@@ -13,10 +13,11 @@ module.exports = {
         include: { association: 'logs' }
       });
 
-      let bankAccounts = await BankAccount.findAll({where:{userId},paranoid: false})
-      let categories = await Category.findAll({where:{userId}, paranoid: false})
-      let spendingGoals = await SpendingGoal.findAll({where:{userId}, paranoid:false})
-      let transactions = await Transaction.findAll({where:{userId}, paranoid:false})
+      let bankAccounts = await Category.findAll({where: {userId}, paranoid: false})
+      let categories = await Category.findAll({where: {userId}, paranoid: false})
+      let spendingGoals = await SpendingGoal.findAll({where: {userId}, paranoid:false})
+      let transactions = await Transaction.findAll({where: {userId}, paranoid:false})
+      let users = await User.findAll({where: {id:userId}})
 
       for(item of user.logs){
         const{ registerId, table } = item
@@ -33,7 +34,9 @@ module.exports = {
         else if(table == 'Transactions'){
           item.transaction = transactions.find(e=> e.id == registerId)
         }
-
+        else if(table == 'Users'){
+          item.user = users.find(e=> e.id == registerId)
+        }
       }
       return res.status(200).send(user.logs);
     },
