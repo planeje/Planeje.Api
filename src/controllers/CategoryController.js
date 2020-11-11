@@ -37,7 +37,7 @@ module.exports = {
     });
     Logger.store({
       userId: userId,
-      table: 'Category',
+      table: 'Categories',
       action: 'I',
       registerId: category.id
     });
