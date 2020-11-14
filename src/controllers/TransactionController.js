@@ -179,7 +179,7 @@ module.exports = {
     } = req.body;
     const transaction = await Transaction.findByPk(id)
     if(transaction) {
-      const transactionEdited = Transaction.update({
+      const transactionEdited = await Transaction.update({
         description,
         recurrent,
         transactionValue,
@@ -193,8 +193,9 @@ module.exports = {
             id: id
         }
       });
+      const newTransaction = await Transaction.findByPk(id)
 
-      if(transaction.transactionValue != transactionValue){
+      if(transaction.transactionValue != transactionValue && transaction.accountId == newTransaction.accountId){
         const bankAccount = await BankAccount.findByPk(transaction.accountId)
         await BankAccount.update({
           balance: bankAccount.balance + (transaction.transactionValue - transactionValue)
@@ -211,6 +212,28 @@ module.exports = {
           valueAvaible: spendingGoal.valueAvaible + (transaction.transactionValue - transactionValue)
           }, {where: { id: spendingGoal.id }}
         );
+      }
+
+      if(transaction.accountId != newTransaction.accountId){
+        const oldBankAccount = await BankAccount.findByPk(transaction.accountId);
+        const newBankAccount = await BankAccount.findByPk(newTransaction.accountId);
+
+        if(transaction.transactionType == 0){
+          await BankAccount.update({
+            balance: oldBankAccount.balance + transaction.transactionValue
+          },{ where: {id: oldBankAccount.id}});
+          await BankAccount.update({
+            balance: newBankAccount.balance - newTransaction.transactionValue
+          },{ where: {id: newBankAccount.id}});
+        }
+        else{
+          await BankAccount.update({
+            balance: oldBankAccount.balance - transaction.transactionValue
+          },{ where: {id: oldBankAccount.id}});
+          await BankAccount.update({
+            balance: newBankAccount.balance + newTransaction.transactionValue
+          },{ where: {id: newBankAccount.id}});
+        }
       }
 
       return res.status(200).send(transactionEdited);
