@@ -195,6 +195,7 @@ module.exports = {
       });
       const newTransaction = await Transaction.findByPk(id)
 
+      //mudar valor sem mudar conta atualiza o valor da conta 
       if(transaction.transactionValue != transactionValue && transaction.accountId == newTransaction.accountId){
         const bankAccount = await BankAccount.findByPk(transaction.accountId)
         await BankAccount.update({
@@ -202,19 +203,10 @@ module.exports = {
         },{
           where: {id: transaction.accountId}
         });
-
-        const spendingGoal = await SpendingGoal.findOne({
-          where: {categoryId: transaction.categoryId},
-          goalDueDate: {[Op.lte] : transaction.transactionDueDate}
-        });
-
-        await SpendingGoal.update({
-          valueAvaible: spendingGoal.valueAvaible + (transaction.transactionValue - transactionValue)
-          }, {where: { id: spendingGoal.id }}
-        );
       }
 
-      if(transaction.accountId != newTransaction.accountId){
+       //Se mudar conta atualiza saldo das contas
+       if(transaction.accountId != newTransaction.accountId){
         const oldBankAccount = await BankAccount.findByPk(transaction.accountId);
         const newBankAccount = await BankAccount.findByPk(newTransaction.accountId);
 
@@ -234,6 +226,39 @@ module.exports = {
             balance: newBankAccount.balance + newTransaction.transactionValue
           },{ where: {id: newBankAccount.id}});
         }
+      }
+
+      //Se mudar valor e nao mudar categoria atualiza meta
+      if(transaction.transactionValue != transactionValue && transaction.categoryId == newTransaction.categoryId){
+        const spendingGoal = await SpendingGoal.findOne({
+          where: {categoryId: transaction.categoryId},
+          goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+        });
+
+        await SpendingGoal.update({
+          valueAvaible: spendingGoal.valueAvaible + (transaction.transactionValue - transactionValue)
+          }, {where: { id: spendingGoal.id }}
+        );
+      }
+
+      //Se mudar meta atualiza valores das metas
+      if(transaction.categoryId !== newTransaction.categoryId){
+        const oldSpendingGoal = await SpendingGoal.findOne({
+          where: {categoryId: transaction.categoryId},
+          goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+        });
+        const newSpendingGoal = await SpendingGoal.findOne({
+          where: {categoryId: newTransaction.categoryId},
+          goalDueDate: {[Op.lte] : newTransaction.transactionDueDate}
+        });
+        await SpendingGoal.update({
+          valueAvaible: oldSpendingGoal.valueAvaible + transaction.transactionValue
+          }, { where : {id: oldSpendingGoal}}
+        );
+        await SpendingGoal.update({
+          valueAvaible: newSpendingGoal.valueAvaible + newTransaction.transactionValue
+          }, { where : {id: newSpendingGoal}}
+        );
       }
 
       return res.status(200).send(transactionEdited);
