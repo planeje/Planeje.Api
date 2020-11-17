@@ -85,7 +85,8 @@ module.exports = {
     await SpendingGoal.update({
       description,
       goalDueDate,
-      value
+      value,
+      valueAvaible: value && value !== goal.value ? goal.valueAvaible + (value - goal.value): goal.valueAvaible
     }, {
       where: {
         id,
@@ -94,6 +95,17 @@ module.exports = {
     });
 
     const goalEdited = await SpendingGoal.findByPk(id);
+
+    // if(goal.value !== goalEdited.value){
+    //   await SpendingGoal.update({
+    //     valueAvaible: goal.valueAvaible + (goal.value - goalEdited.value)
+    //   }, {
+    //     where: {
+    //       id,
+    //       categoryId
+    //     }
+    //   });
+    // }
 
     Logger.store({
       userId: goal.userId,
