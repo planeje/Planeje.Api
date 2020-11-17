@@ -96,17 +96,6 @@ module.exports = {
 
     const goalEdited = await SpendingGoal.findByPk(id);
 
-    // if(goal.value !== goalEdited.value){
-    //   await SpendingGoal.update({
-    //     valueAvaible: goal.valueAvaible + (goal.value - goalEdited.value)
-    //   }, {
-    //     where: {
-    //       id,
-    //       categoryId
-    //     }
-    //   });
-    // }
-
     Logger.store({
       userId: goal.userId,
       table: 'SpendingGoals',
