@@ -13,7 +13,7 @@ module.exports = {
         include: { association: 'logs' }
       });
 
-      let bankAccounts = await Category.findAll({where: {userId}, paranoid: false})
+      let bankAccounts = await BankAccount.findAll({where: {userId}, paranoid: false})
       let categories = await Category.findAll({where: {userId}, paranoid: false})
       let spendingGoals = await SpendingGoal.findAll({where: {userId}, paranoid:false})
       let transactions = await Transaction.findAll({where: {userId}, paranoid:false})
