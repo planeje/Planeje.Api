@@ -179,7 +179,7 @@ module.exports = {
     } = req.body;
     const transaction = await Transaction.findByPk(id)
     if(transaction) {
-      const transactionEdited = Transaction.update({
+      const transactionEdited = await Transaction.update({
         description,
         recurrent,
         transactionValue,
@@ -193,15 +193,43 @@ module.exports = {
             id: id
         }
       });
+      const newTransaction = await Transaction.findByPk(id)
 
-      if(transaction.transactionValue != transactionValue){
+      //mudar valor sem mudar conta atualiza o valor da conta 
+      if(transaction.transactionValue != transactionValue && transaction.accountId == newTransaction.accountId){
         const bankAccount = await BankAccount.findByPk(transaction.accountId)
         await BankAccount.update({
           balance: bankAccount.balance + (transaction.transactionValue - transactionValue)
         },{
           where: {id: transaction.accountId}
         });
+      }
 
+       //Se mudar conta atualiza saldo das contas
+       if(transaction.accountId != newTransaction.accountId){
+        const oldBankAccount = await BankAccount.findByPk(transaction.accountId);
+        const newBankAccount = await BankAccount.findByPk(newTransaction.accountId);
+
+        if(transaction.transactionType == 0){
+          await BankAccount.update({
+            balance: oldBankAccount.balance + transaction.transactionValue
+          },{ where: {id: oldBankAccount.id}});
+          await BankAccount.update({
+            balance: newBankAccount.balance - newTransaction.transactionValue
+          },{ where: {id: newBankAccount.id}});
+        }
+        else{
+          await BankAccount.update({
+            balance: oldBankAccount.balance - transaction.transactionValue
+          },{ where: {id: oldBankAccount.id}});
+          await BankAccount.update({
+            balance: newBankAccount.balance + newTransaction.transactionValue
+          },{ where: {id: newBankAccount.id}});
+        }
+      }
+
+      //Se mudar valor e nao mudar categoria atualiza meta
+      if(transaction.transactionValue != transactionValue && transaction.categoryId == newTransaction.categoryId){
         const spendingGoal = await SpendingGoal.findOne({
           where: {categoryId: transaction.categoryId},
           goalDueDate: {[Op.lte] : transaction.transactionDueDate}
@@ -210,6 +238,26 @@ module.exports = {
         await SpendingGoal.update({
           valueAvaible: spendingGoal.valueAvaible + (transaction.transactionValue - transactionValue)
           }, {where: { id: spendingGoal.id }}
+        );
+      }
+
+      //Se mudar meta atualiza valores das metas
+      if(transaction.categoryId !== newTransaction.categoryId){
+        const oldSpendingGoal = await SpendingGoal.findOne({
+          where: {categoryId: transaction.categoryId},
+          goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+        });
+        const newSpendingGoal = await SpendingGoal.findOne({
+          where: {categoryId: newTransaction.categoryId},
+          goalDueDate: {[Op.lte] : newTransaction.transactionDueDate}
+        });
+        await SpendingGoal.update({
+          valueAvaible: oldSpendingGoal.valueAvaible + transaction.transactionValue
+          }, { where : {id: oldSpendingGoal}}
+        );
+        await SpendingGoal.update({
+          valueAvaible: newSpendingGoal.valueAvaible + newTransaction.transactionValue
+          }, { where : {id: newSpendingGoal}}
         );
       }
 

@@ -85,7 +85,8 @@ module.exports = {
     await SpendingGoal.update({
       description,
       goalDueDate,
-      value
+      value,
+      valueAvaible: value && value !== goal.value ? goal.valueAvaible + (value - goal.value): goal.valueAvaible
     }, {
       where: {
         id,
