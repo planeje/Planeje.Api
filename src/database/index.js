@@ -22,5 +22,6 @@ User.associate(connection.models);
 BankAccount.associate(connection.models);
 Category.associate(connection.models);
 Transaction.associate(connection.models);
+Log.associate(connection.models);
 
 module.exports = connection;

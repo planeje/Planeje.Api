@@ -1,14 +1,23 @@
 const Category = require("../models/Category");
 const User = require("../models/User");
+const dayjs = require("dayjs");
 
+const Logger = require("./LogController")
 
 module.exports = {
   async index(req, res) {
     const { userId } = req.params;
+    const currentDate = dayjs().toISOString();
     const user = await User.findByPk(userId, {
-      include: { association: 'categories' }
+      include: {
+        association: 'categories',
+        include: {
+          association: 'spendingGoals',
+          attributes: ['valueAvaible', 'value'],
+          where: this.goalDueDate > currentDate
+        }
+      }
     });
-
     return res.status(200).send(user.categories);
   },
 
@@ -26,6 +35,12 @@ module.exports = {
       color,
       userId,
     });
+    Logger.store({
+      userId: userId,
+      table: 'Category',
+      action: 'I',
+      registerId: category.id
+    });
     return res.status(200).send(category);
   },
 
@@ -42,6 +57,12 @@ module.exports = {
       }
     });
 
+    Logger.store({
+      userId: category.userId,
+      table: 'Categories',
+      action: 'D',
+      registerId: category.id
+    });
     return res.status(200).send();
   },
 
@@ -62,6 +83,12 @@ module.exports = {
       }
     });
 
+    Logger.store({
+      userId: category.userId,
+      table: 'Categories',
+      action: 'U',
+      registerId: category.id
+    });
     return res.status(200).send(categoryEdited);
   }
 }
