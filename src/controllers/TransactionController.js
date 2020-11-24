@@ -2,8 +2,10 @@ const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 const BankAccount = require("../models/BankAccount");
 const SpendingGoal = require("../models/SpendingGoal");
+const dayjs = require("dayjs");
 const { Op } = require('sequelize');
 const Logger = require("./LogController")
+const now = dayjs().format('YYYY-MM-DD')
 
 module.exports = {
   async index(req, res) {
@@ -58,7 +60,6 @@ module.exports = {
     } = req.body;
 
     const user = await User.findByPk(userId);
-
     //Movimenta valor na transação
     const bankAccount = await BankAccount.findByPk(accountId);
     const spendingGoal = await SpendingGoal.findOne({
@@ -70,28 +71,29 @@ module.exports = {
         }
       },
     });
-    if(transactionType === 0) {
-      await BankAccount.update(
-        { balance: bankAccount.balance - transactionValue },
-        { where: { id: accountId }}
-      );
-      if(!!spendingGoal) {
-        await SpendingGoal.update(
-          { valueAvaible: spendingGoal.valueAvaible - transactionValue },
-          {
-            where: {
-              id: spendingGoal.id
+    if(dayjs(transactionDueDate).isSame(now)){
+      if(transactionType === 0) {
+        await BankAccount.update(
+          { balance: bankAccount.balance - transactionValue },
+          { where: { id: accountId }}
+        );
+        if(!!spendingGoal) {
+          await SpendingGoal.update(
+            { valueAvaible: spendingGoal.valueAvaible - transactionValue },
+            {
+              where: {
+                id: spendingGoal.id
+              }
             }
-          }
+          );
+        }
+      } else {
+        await BankAccount.update(
+          { balance: bankAccount.balance + transactionValue },
+          { where: { id: accountId } }
         );
       }
-    } else {
-      await BankAccount.update(
-        { balance: bankAccount.balance + transactionValue },
-        { where: { id: accountId } }
-      );
     }
-
     if(!user) {
       return res.status(400).json({ error: 'User not found' });
     }
@@ -132,31 +134,33 @@ module.exports = {
         action: 'U',
         registerId: transaction.id
       });
-      //Tira ou coloca saldo da conta
-      const bankAccount = await BankAccount.findByPk(transaction.accountId);
-      const spendingGoal = await SpendingGoal.findOne({
-        where: {categoryId: transaction.categoryId},
-        goalDueDate: {[Op.lte] : transaction.transactionDueDate}
-      });
+      if(dayjs(transactionDueDate).isSameOrBefore(now)){
+        //Tira ou coloca saldo da conta
+        const bankAccount = await BankAccount.findByPk(transaction.accountId);
+        const spendingGoal = await SpendingGoal.findOne({
+          where: {categoryId: transaction.categoryId},
+          goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+        });
 
-      if(transaction.transactionType == 0) {
-        await BankAccount.update(
-          { balance: bankAccount.balance + transaction.transactionValue },
-          { where: { id: transaction.accountId } },
-        );
-        await SpendingGoal.update(
-          { valueAvaible: spendingGoal.valueAvaible - transaction.transactionValue },
-          { where: {
-            categoryId: transaction.categoryId,
-            goalDueDate: {[Op.lte] : transaction.transactionDueDate}
-          } },
-          { limit: 1 }
-        );
-      } else {
-        await BankAccount.update(
-          { balance: bankAccount.balance - transaction.transactionValue },
-          { where: { id: transaction.accountId } },
-        );
+        if(transaction.transactionType == 0) {
+          await BankAccount.update(
+            { balance: bankAccount.balance + transaction.transactionValue },
+            { where: { id: transaction.accountId } },
+          );
+          await SpendingGoal.update(
+            { valueAvaible: spendingGoal.valueAvaible - transaction.transactionValue },
+            { where: {
+              categoryId: transaction.categoryId,
+              goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+            } },
+            { limit: 1 }
+          );
+        } else {
+          await BankAccount.update(
+            { balance: bankAccount.balance - transaction.transactionValue },
+            { where: { id: transaction.accountId } },
+          );
+        }
       }
       return res.status(200).send();
 
@@ -195,70 +199,72 @@ module.exports = {
       });
       const newTransaction = await Transaction.findByPk(id)
 
-      //mudar valor sem mudar conta atualiza o valor da conta 
-      if(transaction.transactionValue != transactionValue && transaction.accountId == newTransaction.accountId){
-        const bankAccount = await BankAccount.findByPk(transaction.accountId)
-        await BankAccount.update({
-          balance: bankAccount.balance + (transaction.transactionValue - transactionValue)
-        },{
-          where: {id: transaction.accountId}
-        });
-      }
-
-       //Se mudar conta atualiza saldo das contas
-       if(transaction.accountId != newTransaction.accountId){
-        const oldBankAccount = await BankAccount.findByPk(transaction.accountId);
-        const newBankAccount = await BankAccount.findByPk(newTransaction.accountId);
-
-        if(transaction.transactionType == 0){
+      if(dayjs(transactionDueDate).isSameOrBefore(now)){
+        //mudar valor sem mudar conta atualiza o valor da conta 
+        if(transaction.transactionValue != transactionValue && transaction.accountId == newTransaction.accountId){
+          const bankAccount = await BankAccount.findByPk(transaction.accountId)
           await BankAccount.update({
-            balance: oldBankAccount.balance + transaction.transactionValue
-          },{ where: {id: oldBankAccount.id}});
-          await BankAccount.update({
-            balance: newBankAccount.balance - newTransaction.transactionValue
-          },{ where: {id: newBankAccount.id}});
+            balance: bankAccount.balance + (transaction.transactionValue - transactionValue)
+          },{
+            where: {id: transaction.accountId}
+          });
         }
-        else{
-          await BankAccount.update({
-            balance: oldBankAccount.balance - transaction.transactionValue
-          },{ where: {id: oldBankAccount.id}});
-          await BankAccount.update({
-            balance: newBankAccount.balance + newTransaction.transactionValue
-          },{ where: {id: newBankAccount.id}});
+
+        //Se mudar conta atualiza saldo das contas
+        if(transaction.accountId != newTransaction.accountId){
+          const oldBankAccount = await BankAccount.findByPk(transaction.accountId);
+          const newBankAccount = await BankAccount.findByPk(newTransaction.accountId);
+
+          if(transaction.transactionType == 0){
+            await BankAccount.update({
+              balance: oldBankAccount.balance + transaction.transactionValue
+            },{ where: {id: oldBankAccount.id}});
+            await BankAccount.update({
+              balance: newBankAccount.balance - newTransaction.transactionValue
+            },{ where: {id: newBankAccount.id}});
+          }
+          else{
+            await BankAccount.update({
+              balance: oldBankAccount.balance - transaction.transactionValue
+            },{ where: {id: oldBankAccount.id}});
+            await BankAccount.update({
+              balance: newBankAccount.balance + newTransaction.transactionValue
+            },{ where: {id: newBankAccount.id}});
+          }
         }
-      }
 
-      //Se mudar valor e nao mudar categoria atualiza meta
-      if(transaction.transactionValue != transactionValue && transaction.categoryId == newTransaction.categoryId){
-        const spendingGoal = await SpendingGoal.findOne({
-          where: {categoryId: transaction.categoryId},
-          goalDueDate: {[Op.lte] : transaction.transactionDueDate}
-        });
+        //Se mudar valor e nao mudar categoria atualiza meta
+        if(transaction.transactionValue != transactionValue && transaction.categoryId == newTransaction.categoryId){
+          const spendingGoal = await SpendingGoal.findOne({
+            where: {categoryId: transaction.categoryId},
+            goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+          });
 
-        await SpendingGoal.update({
-          valueAvaible: spendingGoal.valueAvaible + (transaction.transactionValue - transactionValue)
-          }, {where: { id: spendingGoal.id }}
-        );
-      }
+          await SpendingGoal.update({
+            valueAvaible: spendingGoal.valueAvaible + (transaction.transactionValue - transactionValue)
+            }, {where: { id: spendingGoal.id }}
+          );
+        }
 
-      //Se mudar meta atualiza valores das metas
-      if(transaction.categoryId !== newTransaction.categoryId){
-        const oldSpendingGoal = await SpendingGoal.findOne({
-          where: {categoryId: transaction.categoryId},
-          goalDueDate: {[Op.lte] : transaction.transactionDueDate}
-        });
-        const newSpendingGoal = await SpendingGoal.findOne({
-          where: {categoryId: newTransaction.categoryId},
-          goalDueDate: {[Op.lte] : newTransaction.transactionDueDate}
-        });
-        await SpendingGoal.update({
-          valueAvaible: oldSpendingGoal.valueAvaible + transaction.transactionValue
-          }, { where : {id: oldSpendingGoal}}
-        );
-        await SpendingGoal.update({
-          valueAvaible: newSpendingGoal.valueAvaible + newTransaction.transactionValue
-          }, { where : {id: newSpendingGoal}}
-        );
+        //Se mudar meta atualiza valores das metas
+        if(transaction.categoryId !== newTransaction.categoryId){
+          const oldSpendingGoal = await SpendingGoal.findOne({
+            where: {categoryId: transaction.categoryId},
+            goalDueDate: {[Op.lte] : transaction.transactionDueDate}
+          });
+          const newSpendingGoal = await SpendingGoal.findOne({
+            where: {categoryId: newTransaction.categoryId},
+            goalDueDate: {[Op.lte] : newTransaction.transactionDueDate}
+          });
+          await SpendingGoal.update({
+            valueAvaible: oldSpendingGoal.valueAvaible + transaction.transactionValue
+            }, { where : {id: oldSpendingGoal}}
+          );
+          await SpendingGoal.update({
+            valueAvaible: newSpendingGoal.valueAvaible + newTransaction.transactionValue
+            }, { where : {id: newSpendingGoal}}
+          );
+        }
       }
 
       return res.status(200).send(transactionEdited);
