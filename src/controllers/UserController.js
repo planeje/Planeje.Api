@@ -95,13 +95,13 @@ module.exports = {
         return res.status(400).send({ error: 'User not found!' });
 
       User.update({
-        password: password,
+        password: await bcrypt.hash(password, 10),
       },{
         where: {
           id: id
         }
       });
-      return res.status(201).send();
+      return res.status(200).send();
     },
     async authenticate(req, res) {
       const { email, password } = req.body;
