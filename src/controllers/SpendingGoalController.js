@@ -29,7 +29,6 @@ module.exports = {
       description,
       goalDueDate,
       value,
-      goalDate: new Date(),
       valueAvaible: value,
       userId,
       categoryId

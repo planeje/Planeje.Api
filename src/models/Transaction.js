@@ -6,7 +6,6 @@ class Transaction extends Model{
             description: DataTypes.STRING,
             recurrent: DataTypes.BOOLEAN,
             transactionValue: DataTypes.FLOAT,
-            transactionDate: DataTypes.DATE,
             transactionDueDate: DataTypes.DATE,
             transactionType: DataTypes.INTEGER,
         }, {
