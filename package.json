@@ -18,7 +18,7 @@
   "homepage": "https://github.com/planeje/Planeje.Api#readme",
   "devDependencies": {
     "husky": "^4.2.5",
-    "nodemon": "^2.0.4",
+    "nodemon": "^2.0.20",
     "sequelize-cli": "^6.2.0"
   },
   "dependencies": {
